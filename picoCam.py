@@ -764,13 +764,7 @@ while True:
     esp32CS.on()
     end_handshake_time = time.ticks_ms()
     
-#     esp32CS.on()
-
-#     esp32CS.off()
-#     print(f"got len: {cam.received_length}")
-#     time.sleep(.2)
     start_transaction_time = time.ticks_ms()
-    total = 0;
     cam.first_burst_fifo = True
     esp32CS.off()
     cam_total_read_time = 0
@@ -780,7 +774,6 @@ while True:
         start_cam_read = time.ticks_ms()
         cam._burst_read_FIFO_faster()
         end_cam_read = time.ticks_ms()
-#         total += sum(cam.image_buffer)
         start_slave_write = time.ticks_ms()
         esp32SPI.write(cam.image_buffer)
         end_slave_write = time.ticks_ms()
@@ -789,15 +782,14 @@ while True:
         i += 1
     esp32CS.on()
     print(f"sent messages: {i}")
-#     print(f"sum: {total}")
     print(f"cam transaction duration: {cam_total_read_time}")
     print(f"slave transaction duration: {slave_total_write_time}")
     print(f"handshake duration: {end_handshake_time - start_handshake_time}")
     print(f"capture duration: {end_capture_time - start_capture_time}")
-#     time.sleep(.01)
 
 
     
+
 
 
 
