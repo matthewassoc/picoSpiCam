@@ -249,7 +249,7 @@ class Camera:
     BURST_FIFO_READ = 0X3C
     
     # Size of image_buffer (Burst reading)
-    BUFFER_MAX_LENGTH = 64
+    BUFFER_MAX_LENGTH = 1024
     
     # For 5MP startup routine
     WHITE_BALANCE_WAIT_TIME_MS = 500
@@ -718,8 +718,11 @@ class Camera:
         data = self._read_reg(addr);
         return int.from_bytes(data, 1) & bit;
 
-
-esp32SPI = SPI(1, baudrate=1000000, polarity=0, phase=0, bits=8, sck=machine.Pin(10), mosi=machine.Pin(11), miso=machine.Pin(12))
+# SPIMODE0 is 0-Polarity and 0-Phase
+# SPIMODE1 is 0-Polarity and 1-Phase
+# SPIMODE2 is 1-Polarity and 0-Phase
+# SPIMODE3 is 1-Polarity and 1-Phase
+esp32SPI = SPI(1, baudrate=8000000, polarity=0, phase=1, bits=8, sck=machine.Pin(10), mosi=machine.Pin(11), miso=machine.Pin(12))
 esp32CS = Pin(13, Pin.OUT)
 esp32CS.high()
 
@@ -757,8 +760,9 @@ while True:
     start_handshake_time = time.ticks_ms()
     esp32CS.off()
     while readyToBurstSend is False:
+        # We need a write read to ensure a full duplex transaction is made
         esp32SPI.write_readinto(metadataMessage, readBuf1)
-        # Checking for a valid slave response, expect the slave to send back
+        # Checking for a valid slave response, expect the slave to send back a nothing but 222
         if readBuf1[0] == 222:
             readyToBurstSend = True
     esp32CS.on()
